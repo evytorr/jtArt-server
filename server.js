@@ -491,6 +491,11 @@ app.post('/uploadImage', upload.single('file'), function (req, res) {
 
 });
 
+app.get('/', function(req, res){
+  res.status(200).send({
+    data: 'my app is running'
+  })
+})
 var port = process.env.PORT || 8008;
 app.listen(port, function () {
   console.log('my server is listening on port', port);
