@@ -6,6 +6,16 @@ var nodemailer = require('nodemailer');
 var hbs = require('nodemailer-express-handlebars');
 var path = require('path');
 
+// This is for the upload stuff
+var multer = require('multer');
+var upload = multer();
+require('isomorphic-fetch');
+
+var Dropbox = require('dropbox').Dropbox;
+var dbx = new Dropbox({
+  accessToken: '0r2s0ja-j9YAAAAAAAADICUwRDeFx7NPYMe1nyJMGs4meAQbiU24e_ehv2py7oxx'
+});
+
 //Step 2. create new instance (library) of express object
 var app = new express();
 
@@ -16,10 +26,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //This handles data that is nested in other functions, so it is an absolute must.
 app.use(cors({ origin: true, credentials: true }));
 
-app.listen(8080, function () {
-  console.log('my server is listening on localhost:8080')
-});
-
 //Step 4. Create simple API
 //This is on a basic level what an API route looks like.  The '/' is the url.  
 app.get('/getGallery', function (request, response) {
@@ -27,7 +33,6 @@ app.get('/getGallery', function (request, response) {
     {
       url: '../assets/cultural/atole.jpg',
       type: 'culture',
-      type: 'all',
     },
     {
       url: '../assets/cultural/concha.jpg',
@@ -224,6 +229,7 @@ app.get('/getGallery', function (request, response) {
     {
       url: '../assets/politicalCartoon/ovarypower.jpg',
       type: 'politicalCartoon',
+
     },
     {
       url: '../assets/politicalCartoon/Puppet.jpg',
@@ -258,20 +264,20 @@ app.get('/getGallery', function (request, response) {
       type: 'portraits',
     },
     {
-      url: '../assets/cactus.jpg',
-      type: 'misc',
+      url: '../assets/misc/cactus.jpg',
+      type: 'miscellaneous',
     },
     {
-      url: '../assets/chameleon.jpg',
-      type: 'misc',
+      url: '../assets/misc/chameleon.jpg',
+      type: 'miscellaneous',
     },
     {
-      url: '../assets/flower.jpg',
-      type: 'misc',
+      url: '../assets/misc/flower.jpg',
+      type: 'miscellaneous',
     },
     {
-      url: '../assets/maiz.jpg',
-      type: 'misc',
+      url: '../assets/misc/maiz.jpg',
+      type: 'miscellaneous',
     },
   ];
 
@@ -282,21 +288,21 @@ app.get('/getStore', function (request, response) {
   var storeArray = [
     {
       url: '../assets/cultural/atole.jpg',
-      type: 'culture',
+      type: 'cultural',
       title: 'Atolito y Conchita',
       dimensions: '8.5 x 11"',
       price: '$10.00',
     },
     {
       url: '../assets/cultural/concha.jpg',
-      type: 'culture',
+      type: 'cultural',
       title: 'Que Concha!',
       dimensions: '5 x 6"',
       price: '$7.00',
     },
     {
       url: '../assets/cultural/maizprieto.jpg',
-      type: 'culture',
+      type: 'cultural',
       title: 'Que Chulada de Maiz Prieto',
       dimensions: '5 x 6"',
       price: '$7.00',
@@ -365,22 +371,22 @@ app.get('/getStore', function (request, response) {
       price: '$10.00',
     },
     {
-      url: '../assets/cactus.jpg',
-      type: 'misc',
+      url: '../assets/misc/cactus.jpg',
+      type: 'miscellaneous',
       title: 'Flor de Cactus',
       dimensions: '8.5 x 10"',
       price: '$10.00',
     },
     {
-      url: '../assets/flower.jpg',
-      type: 'misc',
+      url: '../assets/misc/flower.jpg',
+      type: 'miscellaneous',
       title: 'Cempasuchil (Flor de Muerto)',
       dimensions: '8.5 x 10"',
       price: '$10.00',
     },
     {
-      url: '../assets/maiz.jpg',
-      type: 'misc',
+      url: '../assets/misc/maiz.jpg',
+      type: 'miscellaneous',
       title: 'Visión de Centeotl',
       dimensions: '8.5 x 5.5"',
       price: '$40.00',
@@ -419,7 +425,7 @@ app.post('/sendEmail', function (request, response) {
       template: 'index',
       context: {
         firstName: request.body.firstName,
-        lastName: request.body.lastName, 
+        lastName: request.body.lastName,
         email: request.body.email,
         comments: request.body.comments,
       }
@@ -427,7 +433,7 @@ app.post('/sendEmail', function (request, response) {
 
     let handlebarsOptions = {
       viewEngine: 'handlebars',
-      viewPath: path.resolve('./templates'), 
+      viewPath: path.resolve('./templates'),
       extName: '.html',
     }
 
@@ -448,4 +454,43 @@ app.post('/sendEmail', function (request, response) {
   });
 
   response.status(200).send('ok');
+});
+
+app.post('/uploadImage', upload.single('file'), function (req, res) {
+  // This is where Angel left off//
+  const imageName = req.file.originalname;
+  const imageMeat = req.file.buffer;
+
+  dbx.filesUpload(
+    {
+      path: '/pictures/' + imageName,
+      contents: imageMeat,
+      mode: 'overwrite'
+    }
+  ).then(function (response) {
+    dbx.sharingCreateSharedLink({
+      path: '/pictures/' + imageName,
+    })
+      .then(function (response) {
+        res.status(200).send({
+          data: response
+        })
+      })
+      .catch(function (error) {
+        res.status(500).send({
+          data: error
+        });
+      })
+  })
+    .catch(function (err) {
+      console.log(err);
+      res.status(500).send({
+        data: err
+      });
+    })
+
+});
+
+app.listen(8080, function () {
+  console.log('my server is listening on localhost:8080')
 });
