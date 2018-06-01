@@ -491,6 +491,7 @@ app.post('/uploadImage', upload.single('file'), function (req, res) {
 
 });
 
-app.listen(8080, function () {
-  console.log('my server is listening on localhost:8080')
+var port = process.env.PORT || 8008;
+app.listen(port, function () {
+  console.log('my server is listening on port', port);
 });
