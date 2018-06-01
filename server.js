@@ -448,12 +448,15 @@ app.post('/sendEmail', function (request, response) {
       // Preview only available when sending through an Ethereal account
       console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 
+      response.status(200).send({
+        data: 'ok'
+      });
       // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
       // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
     });
   });
 
-  response.status(200).send('ok');
+
 });
 
 app.post('/uploadImage', upload.single('file'), function (req, res) {
@@ -495,7 +498,8 @@ app.get('/', function(req, res){
   res.status(200).send({
     data: 'my app is running'
   })
-})
+});
+
 var port = process.env.PORT || 8008;
 app.listen(port, function () {
   console.log('my server is listening on port', port);
