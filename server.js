@@ -5,6 +5,32 @@ var cors = require('cors');
 var nodemailer = require('nodemailer');
 var hbs = require('nodemailer-express-handlebars');
 var path = require('path');
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var async = require('async');
+//gallerySchema is the name of the collection//
+var gallerySchema = new Schema(
+
+  {
+    src: { type: 'string', required: true },
+    thumb: { type: 'string', required: true},
+    type: { type: 'string', required: true },
+  },
+
+)
+
+var Gallery = mongoose.model('GalleryItem', gallerySchema);
+
+//This connects to our MLAB database.  Grab the link from your account and paste after mongoose.connect, dont forget to enter your password and username.//
+mongoose.connect('mongodb://admin:google13@ds247170.mlab.com:47170/jtart');
+
+//Grab this code from the get started guide on mongoose js website.//
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+
+db.once('open', function() {
+  console.log('successfully connected to database');
+});
 
 // This is for the upload stuff
 var multer = require('multer');
@@ -29,259 +55,13 @@ app.use(cors({ origin: true, credentials: true }));
 //Step 4. Create simple API
 //This is on a basic level what an API route looks like.  The '/' is the url.  
 app.get('/getGallery', function (request, response) {
-  var galleryArray = [
-    {
-      url: '../assets/cultural/atole.jpg',
-      type: 'culture',
-    },
-    {
-      url: '../assets/cultural/concha.jpg',
-      type: 'culture',
-    },
-    {
-      url: '../assets/cultural/maizprieto.jpg',
-      type: 'culture',
-    },
-    {
-      url: '../assets/inktober/diadelosmuertos.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/llorona.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/politicalCartoon/ladyliberty.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/swamp.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/cultural/lucha.jpg',
-      type: 'cultural',
-    },
-    {
-      url: '../assets/cultural/ojo.jpg',
-      type: 'cultural',
-    },
-    {
-      url: '../assets/cultural/concha2.jpg',
-      type: 'cultural',
-    },
-    {
-      url: '../assets/cultural/corazon.jpg',
-      type: 'cultural',
-    },
-    {
-      url: '../assets/cultural/evy.jpg',
-      type: 'cultural',
-    },
-    {
-      url: '../assets/cultural/muneca.jpg',
-      type: 'cultural',
-    },
-    {
-      url: '../assets/cultural/nopales.jpg',
-      type: 'cultural',
-    },
-    {
-      url: '../assets/inktober/alienfrida.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/alienmab.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/bats.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/bruja.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/burton.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/calavera.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/cantinflas.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/chupacabras.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/coco.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/donramon.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/goblin.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/goblin2.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/hauntedhouse.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/jirafales.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/juanga.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/nosferatu.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/pumpkin.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/rat.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/raven.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/roadmonster.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/seamonster.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/spiderevy.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/tree.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/vampire.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/inktober/werewolf.jpg',
-      type: 'inktober',
-    },
-    {
-      url: '../assets/politicalCartoon/dolls.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/field.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/fist.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/icecream.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/kellyanne.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/ladyliberty.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/ladyliberty2.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/maga.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/mcconell.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/miller.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/ovarypower.jpg',
-      type: 'politicalCartoon',
+  Gallery.find(function (err, galleryItems){
+    if(err) throw err;
 
-    },
-    {
-      url: '../assets/politicalCartoon/Puppet.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/spicer.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/standingrock.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/swamp.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/politicalCartoon/toilet.jpg',
-      type: 'politicalCartoon',
-    },
-    {
-      url: '../assets/portraits/betty.jpg',
-      type: 'portraits',
-    },
-    {
-      url: '../assets/portraits/doctor.jpg',
-      type: 'portraits',
-    },
-    {
-      url: '../assets/portraits/smoking.jpg',
-      type: 'portraits',
-    },
-    {
-      url: '../assets/misc/cactus.jpg',
-      type: 'miscellaneous',
-    },
-    {
-      url: '../assets/misc/chameleon.jpg',
-      type: 'miscellaneous',
-    },
-    {
-      url: '../assets/misc/flower.jpg',
-      type: 'miscellaneous',
-    },
-    {
-      url: '../assets/misc/maiz.jpg',
-      type: 'miscellaneous',
-    },
-  ];
+    response.status(200).send(galleryItems);
+  })
 
-  response.status(200).send(galleryArray);
+
 });
 
 app.get('/getStore', function (request, response) {
@@ -394,7 +174,8 @@ app.get('/getStore', function (request, response) {
   ];
 
   response.status(200).send(storeArray);
-});
+});  
+
 
 //After making changes in your server.js file, kill your command prompt by typing Ctrl+C, and then type node and the name of your file. So, "node server.js"
 
@@ -495,10 +276,20 @@ app.post('/uploadImage', upload.single('file'), function (req, res) {
 });
 
 app.get('/', function(req, res){
-  res.status(200).send({
-    data: 'my app is running'
+  var newItem = new Gallery({
+    src: 'assets/me/to',
+    thumb: 'assets/me/to',
+    type: 'misc'
+  });
+
+  newItem.save( (err) => {
+    res.status(200).send({
+      data: 'my app is running'
+    })
   })
 });
+
+
 
 var port = process.env.PORT || 8008;
 app.listen(port, function () {
