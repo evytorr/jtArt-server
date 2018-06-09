@@ -13,7 +13,7 @@ var gallerySchema = new Schema(
 
   {
     src: { type: 'string', required: true },
-    thumb: { type: 'string', required: true},
+    thumb: { type: 'string', required: true },
     type: { type: 'string', required: true },
   },
 
